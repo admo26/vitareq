@@ -6,6 +6,7 @@ import TextField from "@atlaskit/textfield";
 import TextArea from "@atlaskit/textarea";
 import SectionMessage from "@atlaskit/section-message";
 import axios from "axios";
+import { useAuth0 } from "@auth0/auth0-react";
 
 type Dossier = {
   id: string;
@@ -16,13 +17,21 @@ type Dossier = {
 };
 
 export default function DossiersPage() {
+  const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
   const [items, setItems] = useState<Dossier[]>([]);
   const [name, setName] = useState("");
   const [summary, setSummary] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const res = await axios.get<Dossier>("/api/dossiers").catch((e) => {
+    let headers: Record<string, string> = {};
+    try {
+      if (isAuthenticated) {
+        const token = await getAccessTokenSilently();
+        headers = { Authorization: `Bearer ${token}` };
+      }
+    } catch {}
+    const res = await axios.get<Dossier>("/api/dossiers", { headers }).catch((e) => {
       setError(e?.response?.data?.error ?? e.message);
       return null;
     });
@@ -31,12 +40,22 @@ export default function DossiersPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [isAuthenticated]);
 
   async function create() {
     setError(null);
+    let headers: Record<string, string> = {};
+    try {
+      if (isAuthenticated) {
+        const token = await getAccessTokenSilently();
+        headers = { Authorization: `Bearer ${token}` };
+      } else {
+        await loginWithRedirect();
+        return;
+      }
+    } catch {}
     const res = await axios
-      .post("/api/dossiers", { name, summary })
+      .post("/api/dossiers", { name, summary }, { headers })
       .catch((e) => {
         setError(e?.response?.data?.error ?? e.message);
         return null;

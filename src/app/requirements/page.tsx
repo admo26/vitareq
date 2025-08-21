@@ -6,6 +6,7 @@ import TextField from "@atlaskit/textfield";
 import TextArea from "@atlaskit/textarea";
 import SectionMessage from "@atlaskit/section-message";
 import axios from "axios";
+import { useAuth0 } from "@auth0/auth0-react";
 
 type Requirement = {
   id: string;
@@ -16,13 +17,21 @@ type Requirement = {
 };
 
 export default function RequirementsPage() {
+  const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
   const [items, setItems] = useState<Requirement[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const res = await axios.get<Requirement>("/api/requirements").catch((e) => {
+    let headers: Record<string, string> = {};
+    try {
+      if (isAuthenticated) {
+        const token = await getAccessTokenSilently();
+        headers = { Authorization: `Bearer ${token}` };
+      }
+    } catch {}
+    const res = await axios.get<Requirement>("/api/requirements", { headers }).catch((e) => {
       setError(e?.response?.data?.error ?? e.message);
       return null;
     });
@@ -31,12 +40,22 @@ export default function RequirementsPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [isAuthenticated]);
 
   async function create() {
     setError(null);
+    let headers: Record<string, string> = {};
+    try {
+      if (isAuthenticated) {
+        const token = await getAccessTokenSilently();
+        headers = { Authorization: `Bearer ${token}` };
+      } else {
+        await loginWithRedirect();
+        return;
+      }
+    } catch {}
     const res = await axios
-      .post("/api/requirements", { title, description })
+      .post("/api/requirements", { title, description }, { headers })
       .catch((e) => {
         setError(e?.response?.data?.error ?? e.message);
         return null;
