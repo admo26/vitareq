@@ -1,0 +1,94 @@
+"use client";
+import { useEffect, useState } from "react";
+// Replacing Atlaskit Heading to avoid type mismatch in this prototype
+import Button from "@atlaskit/button";
+import TextField from "@atlaskit/textfield";
+import TextArea from "@atlaskit/textarea";
+import SectionMessage from "@atlaskit/section-message";
+import axios from "axios";
+
+type Requirement = {
+  id: string;
+  title: string;
+  description?: string | null;
+  status: "DRAFT" | "IN_REVIEW" | "APPROVED" | "ARCHIVED";
+  createdAt: string;
+};
+
+export default function RequirementsPage() {
+  const [items, setItems] = useState<Requirement[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    const res = await axios.get<Requirement>("/api/requirements").catch((e) => {
+      setError(e?.response?.data?.error ?? e.message);
+      return null;
+    });
+    if (res) setItems(res.data as any);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function create() {
+    setError(null);
+    const res = await axios
+      .post("/api/requirements", { title, description })
+      .catch((e) => {
+        setError(e?.response?.data?.error ?? e.message);
+        return null;
+      });
+    if (res) {
+      setTitle("");
+      setDescription("");
+      load();
+    }
+  }
+
+  return (
+    <div style={{ padding: 24 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 600 }}>Requirements</h2>
+      {error && (
+        <div style={{ marginTop: 12 }}>
+          <SectionMessage appearance="error">{error}</SectionMessage>
+        </div>
+      )}
+      <div style={{ display: "grid", gap: 12, maxWidth: 560, marginTop: 16 }}>
+        <TextField
+          name="title"
+          value={title}
+          onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
+          placeholder="Title"
+        />
+        <TextArea
+          name="description"
+          value={description}
+          onChange={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
+          placeholder="Description"
+        />
+        <Button appearance="primary" onClick={create} isDisabled={!title.trim()}>
+          Create requirement
+        </Button>
+      </div>
+
+      <div style={{ marginTop: 24, display: "grid", gap: 8 }}>
+        {items.map((r) => (
+          <div key={r.id} style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <strong>{r.title}</strong>
+              <Button appearance="subtle" onClick={async () => {
+                await axios.delete(`/api/requirements/${r.id}`).catch((e) => setError(e?.response?.data?.error ?? e.message));
+                load();
+              }}>Delete</Button>
+            </div>
+            {r.description && <div style={{ marginTop: 4 }}>{r.description}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+

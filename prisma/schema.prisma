@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Requirement {
+  id          String             @id @default(cuid())
+  title       String
+  description String?
+  status      RequirementStatus  @default(DRAFT)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  dossierId   String?
+  dossier     Dossier?           @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+}
+
+model Dossier {
+  id           String           @id @default(cuid())
+  name         String
+  summary      String?
+  status       DossierStatus    @default(OPEN)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  requirements Requirement[]
+}
+
+enum RequirementStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  ARCHIVED
+}
+
+enum DossierStatus {
+  OPEN
+  SUBMITTED
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
