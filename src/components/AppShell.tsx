@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth0 } from "@auth0/auth0-react";
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
+  const { isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
   return (
     <>
       <div style={{
@@ -19,9 +19,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link href="/dossiers">Dossiers</Link>
         <div style={{ marginLeft: "auto" }}>
           {isAuthenticated ? (
-            <button onClick={() => logout({ returnTo: window.location.origin })}>Sign out</button>
+            <button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
+              Sign out
+            </button>
           ) : (
-            <button onClick={() => loginWithRedirect()}>Sign in</button>
+            <button onClick={() => loginWithRedirect()} disabled={isLoading}>
+              {isLoading ? "Loading…" : "Sign in"}
+            </button>
           )}
         </div>
       </div>

@@ -24,7 +24,7 @@ export default function AuthProvider({ children }: Props) {
         audience: audience || undefined,
         redirect_uri: redirectUri,
       }}
-      cacheLocation="memory"
+      cacheLocation="localstorage"
     >
       {children}
     </Auth0Provider>
