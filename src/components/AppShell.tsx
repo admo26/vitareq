@@ -2,6 +2,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { useAuth0 } from "@auth0/auth0-react";
+import Button from "@atlaskit/button";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
@@ -19,13 +20,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link href="/dossiers">Dossiers</Link>
         <div style={{ marginLeft: "auto" }}>
           {isAuthenticated ? (
-            <button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
+            <Button
+              appearance="subtle"
+              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            >
               Sign out
-            </button>
+            </Button>
           ) : (
-            <button onClick={() => loginWithRedirect()} disabled={isLoading}>
+            <Button
+              appearance="primary"
+              onClick={() => loginWithRedirect()}
+              isDisabled={isLoading}
+            >
               {isLoading ? "Loading…" : "Sign in"}
-            </button>
+            </Button>
           )}
         </div>
       </div>
