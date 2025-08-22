@@ -27,15 +27,29 @@ export default function RequirementsPage() {
     let headers: Record<string, string> = {};
     try {
       if (isAuthenticated) {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE },
+        });
         headers = { Authorization: `Bearer ${token}` };
       }
     } catch {}
-    const res = await axios.get<Requirement>("/api/requirements", { headers }).catch((e) => {
-      setError(e?.response?.data?.error ?? e.message);
-      return null;
-    });
-    if (res) setItems(res.data as any);
+    const res = await axios
+      .get<Requirement>("/api/requirements", { headers })
+      .catch(async (e) => {
+        const status = e?.response?.status;
+        if (status === 401 && !isAuthenticated) {
+          try {
+            await loginWithRedirect();
+          } catch {}
+        } else {
+          setError(e?.response?.data?.error ?? e.message);
+        }
+        return null;
+      });
+    if (res) {
+      setError(null);
+      setItems(res.data as any);
+    }
   }
 
   useEffect(() => {
@@ -47,7 +61,9 @@ export default function RequirementsPage() {
     let headers: Record<string, string> = {};
     try {
       if (isAuthenticated) {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE },
+        });
         headers = { Authorization: `Bearer ${token}` };
       } else {
         await loginWithRedirect();
