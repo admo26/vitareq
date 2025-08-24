@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed": "tsx prisma/seed.ts",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@atlaskit/atlassian-navigation": "^5.3.12",
@@ -24,6 +26,7 @@
     "@atlaskit/modal-dialog": "^14.3.5",
     "@atlaskit/page-layout": "^4.2.10",
     "@atlaskit/section-message": "^8.5.2",
+    "@atlaskit/skeleton": "^2.1.1",
     "@atlaskit/table": "^0.12.6",
     "@atlaskit/tabs": "^18.1.6",
     "@atlaskit/textarea": "^8.0.6",
@@ -50,6 +53,10 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.0",
     "prisma": "^6.14.0",
+    "tsx": "^4.20.5",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

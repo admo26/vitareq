@@ -2,11 +2,11 @@
 import { useEffect, useState } from "react";
 // Replacing Atlaskit Heading to avoid type mismatch in this prototype
 import Button from "@atlaskit/button";
-import TextField from "@atlaskit/textfield";
-import TextArea from "@atlaskit/textarea";
 import SectionMessage from "@atlaskit/section-message";
+import Lozenge from "@atlaskit/lozenge";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import Skeleton from "@atlaskit/skeleton";
 
 type Dossier = {
   id: string;
@@ -19,11 +19,11 @@ type Dossier = {
 export default function DossiersPage() {
   const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
   const [items, setItems] = useState<Dossier[]>([]);
-  const [name, setName] = useState("");
-  const [summary, setSummary] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
+    setLoading(true);
     let headers: Record<string, string> = {};
     try {
       if (isAuthenticated) {
@@ -50,38 +50,14 @@ export default function DossiersPage() {
       setError(null);
       setItems(res.data as any);
     }
+    setLoading(false);
   }
 
   useEffect(() => {
     load();
   }, [isAuthenticated]);
 
-  async function create() {
-    setError(null);
-    let headers: Record<string, string> = {};
-    try {
-      if (isAuthenticated) {
-        const token = await getAccessTokenSilently({
-          authorizationParams: { audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE },
-        });
-        headers = { Authorization: `Bearer ${token}` };
-      } else {
-        await loginWithRedirect();
-        return;
-      }
-    } catch {}
-    const res = await axios
-      .post("/api/dossiers", { name, summary }, { headers })
-      .catch((e) => {
-        setError(e?.response?.data?.error ?? e.message);
-        return null;
-      });
-    if (res) {
-      setName("");
-      setSummary("");
-      load();
-    }
-  }
+  async function create() { /* removed: now using modal */ }
 
   return (
     <div style={{ padding: 24 }}>
@@ -91,29 +67,32 @@ export default function DossiersPage() {
           <SectionMessage appearance="error">{error}</SectionMessage>
         </div>
       )}
-      <div style={{ display: "grid", gap: 12, maxWidth: 560, marginTop: 16 }}>
-        <TextField
-          name="name"
-          value={name}
-          onChange={(e) => setName((e.target as HTMLInputElement).value)}
-          placeholder="Name"
-        />
-        <TextArea
-          name="summary"
-          value={summary}
-          onChange={(e) => setSummary((e.target as HTMLTextAreaElement).value)}
-          placeholder="Summary"
-        />
-        <Button appearance="primary" onClick={create} isDisabled={!name.trim()}>
-          Create dossier
-        </Button>
-      </div>
 
       <div style={{ marginTop: 24, display: "grid", gap: 8 }}>
-        {items.map((r) => (
+        {loading ? (
+          <>
+            <Skeleton height={72} />
+            <Skeleton height={72} />
+            <Skeleton height={72} />
+          </>
+        ) : items.map((r) => (
           <div key={r.id} style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <strong>{r.name}</strong>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <strong>{r.name}</strong>
+                <Lozenge appearance={
+                  r.status === "APPROVED" ? "success" :
+                  r.status === "OPEN" ? "new" :
+                  r.status === "SUBMITTED" ? "inprogress" :
+                  r.status === "REJECTED" ? "removed" : "default"
+                }>
+                  {r.status === "OPEN" ? "Open" :
+                   r.status === "SUBMITTED" ? "Submitted" :
+                   r.status === "APPROVED" ? "Approved" :
+                   r.status === "REJECTED" ? "Rejected" :
+                   "Archived"}
+                </Lozenge>
+              </div>
               <Button appearance="subtle" onClick={async () => {
                 await axios.delete(`/api/dossiers/${r.id}`).catch((e) => setError(e?.response?.data?.error ?? e.message));
                 load();

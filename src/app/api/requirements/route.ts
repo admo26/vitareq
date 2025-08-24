@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { ensureAuth } from "@/lib/auth";
 import { z } from "zod";
+import { Prisma } from "@/generated/prisma";
 
 export async function GET(req: Request) {
   const unauthorized = await ensureAuth(req);
@@ -9,14 +10,22 @@ export async function GET(req: Request) {
   const items = await prisma.requirement.findMany({
     orderBy: { createdAt: "desc" },
   });
-  return Response.json(items);
+  const { origin } = new URL(req.url);
+  const withUrls = items.map((r) => ({ ...r, url: `${origin}/api/requirements/${r.id}` }));
+  return Response.json(withUrls);
 }
 
 const RequirementCreateSchema = z.object({
   title: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   status: z.enum(["DRAFT", "IN_REVIEW", "APPROVED", "ARCHIVED"]).optional(),
-  dossierId: z.string().optional(),
+  dossierId: z.string().nullable().optional(),
+  requirementNumber: z
+    .string()
+    .regex(/^[A-Z]+-\d+$/i, "Invalid requirement number format (e.g. ABC-123)")
+    .optional(),
+  owner: z.string().min(1).optional(),
+  dueDate: z.coerce.date().optional(),
 });
 
 export async function POST(req: Request) {
@@ -32,14 +41,33 @@ export async function POST(req: Request) {
     });
   }
 
-  const created = await prisma.requirement.create({
-    data: {
-      title: parsed.data.title,
-      description: parsed.data.description,
-      status: parsed.data.status ?? "DRAFT",
-      dossierId: parsed.data.dossierId,
-    },
-  });
-  return Response.json(created, { status: 201 });
+  try {
+    const created = await prisma.requirement.create({
+      data: {
+        title: parsed.data.title,
+        description: parsed.data.description,
+        status: parsed.data.status ?? "DRAFT",
+        dossierId: parsed.data.dossierId,
+        requirementNumber: parsed.data.requirementNumber?.toUpperCase(),
+        owner: parsed.data.owner,
+        dueDate: parsed.data.dueDate,
+      },
+    });
+    const { origin } = new URL(req.url);
+    return Response.json({ ...created, url: `${origin}/api/requirements/${created.id}` }, { status: 201 });
+  } catch (e: unknown) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === "P2002") {
+        return new Response(JSON.stringify({ error: "Requirement number must be unique" }), {
+          status: 409,
+          headers: { "content-type": "application/json" },
+        });
+      }
+    }
+    return new Response(JSON.stringify({ error: "Failed to create requirement" }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
+  }
 }
 

@@ -11,11 +11,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Configure seed script
+// Prisma uses package.json prisma.db.seed by default; alternatively via CLI scripts
+
 model Requirement {
   id          String             @id @default(cuid())
   title       String
   description String?
   status      RequirementStatus  @default(DRAFT)
+  requirementNumber String?       @unique
+  owner       String?
+  dueDate     DateTime?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   dossierId   String?

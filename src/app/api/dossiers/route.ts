@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
 const DossierCreateSchema = z.object({
   name: z.string().min(1),
-  summary: z.string().optional(),
+  summary: z.string().nullable().optional(),
   status: z.enum(["OPEN", "SUBMITTED", "APPROVED", "REJECTED", "ARCHIVED"]).optional(),
 });
 
