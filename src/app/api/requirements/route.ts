@@ -7,10 +7,20 @@ export async function GET(req: Request) {
   const unauthorized = await ensureAuth(req);
   if (unauthorized) return unauthorized;
 
+  const url = new URL(req.url);
+  const jiraKeyParam = url.searchParams.get("jiraKey");
+  const { origin } = url;
+
+  if (jiraKeyParam) {
+    const key = jiraKeyParam.toUpperCase();
+    const item = await prisma.requirement.findFirst({ where: { jiraKey: key } });
+    if (!item) return new Response("Not found", { status: 404 });
+    return Response.json({ ...item, url: `${origin}/api/requirements/${item.id}` });
+  }
+
   const items = await prisma.requirement.findMany({
     orderBy: { createdAt: "desc" },
   });
-  const { origin } = new URL(req.url);
   const withUrls = items.map((r) => ({ ...r, url: `${origin}/api/requirements/${r.id}` }));
   return Response.json(withUrls);
 }
