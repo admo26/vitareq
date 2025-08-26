@@ -10,7 +10,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const item = await prisma.requirement.findUnique({ where: { id: params.id } });
   if (!item) return new Response("Not found", { status: 404 });
   const { origin } = new URL(req.url);
-  return Response.json({ ...item, url: `${origin}/api/requirements/${item.id}` });
+  return Response.json({
+    ...item,
+    url: `${origin}/api/requirements/${item.id}`,
+    web_url: `${origin}/requirements/${item.id}`,
+  });
 }
 
 const RequirementUpdateSchema = z.object({
@@ -49,7 +53,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         jiraKey: parsed.data.jiraKey === null ? null : parsed.data.jiraKey?.toUpperCase(),
       },
     });
-    return Response.json(updated);
+    const { origin } = new URL(req.url);
+    return Response.json({
+      ...updated,
+      url: `${origin}/api/requirements/${updated.id}`,
+      web_url: `${origin}/requirements/${updated.id}`,
+    });
   } catch (e: unknown) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === "P2002") {

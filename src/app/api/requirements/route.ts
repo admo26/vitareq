@@ -15,13 +15,21 @@ export async function GET(req: Request) {
     const key = jiraKeyParam.toUpperCase();
     const item = await prisma.requirement.findFirst({ where: { jiraKey: key } });
     if (!item) return new Response("Not found", { status: 404 });
-    return Response.json({ ...item, url: `${origin}/api/requirements/${item.id}` });
+    return Response.json({
+      ...item,
+      url: `${origin}/api/requirements/${item.id}`,
+      web_url: `${origin}/requirements/${item.id}`,
+    });
   }
 
   const items = await prisma.requirement.findMany({
     orderBy: { createdAt: "desc" },
   });
-  const withUrls = items.map((r) => ({ ...r, url: `${origin}/api/requirements/${r.id}` }));
+  const withUrls = items.map((r) => ({
+    ...r,
+    url: `${origin}/api/requirements/${r.id}`,
+    web_url: `${origin}/requirements/${r.id}`,
+  }));
   return Response.json(withUrls);
 }
 
@@ -66,7 +74,14 @@ export async function POST(req: Request) {
       },
     });
     const { origin } = new URL(req.url);
-    return Response.json({ ...created, url: `${origin}/api/requirements/${created.id}` }, { status: 201 });
+    return Response.json(
+      {
+        ...created,
+        url: `${origin}/api/requirements/${created.id}`,
+        web_url: `${origin}/requirements/${created.id}`,
+      },
+      { status: 201 }
+    );
   } catch (e: unknown) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === "P2002") {
