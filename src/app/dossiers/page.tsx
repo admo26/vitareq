@@ -21,6 +21,7 @@ export default function DossiersPage() {
   const [items, setItems] = useState<Dossier[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<Dossier["status"] | "ALL">("ALL");
 
   async function load() {
     setLoading(true);
@@ -68,15 +69,35 @@ export default function DossiersPage() {
         </div>
       )}
 
-      <div style={{ marginTop: 24, display: "grid", gap: 8 }}>
+      <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 8 }}>
+        <label htmlFor="dos-status-filter" style={{ fontSize: 12, color: "#6B778C" }}>Filter status</label>
+        <select
+          id="dos-status-filter"
+          name="dos-status-filter"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+          style={{ height: 32, border: "1px solid #EBECF0", borderRadius: 3, padding: "4px 8px" }}
+        >
+          <option value="ALL">All</option>
+          <option value="OPEN">Open</option>
+          <option value="SUBMITTED">Submitted</option>
+          <option value="APPROVED">Approved</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="ARCHIVED">Archived</option>
+        </select>
+      </div>
+
+      <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
         {loading ? (
           <>
-            <Skeleton height={72} />
-            <Skeleton height={72} />
-            <Skeleton height={72} />
+            <Skeleton height={72} width="100%" />
+            <Skeleton height={72} width="100%" />
+            <Skeleton height={72} width="100%" />
           </>
-        ) : items.map((r) => (
-          <div key={r.id} style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4 }}>
+        ) : items
+          .filter((r) => statusFilter === "ALL" ? true : r.status === statusFilter)
+          .map((r) => (
+          <div key={r.id} onClick={() => window.location.assign(`/dossiers/${r.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4, cursor: "pointer" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <strong>{r.name}</strong>
@@ -93,10 +114,7 @@ export default function DossiersPage() {
                    "Archived"}
                 </Lozenge>
               </div>
-              <Button appearance="subtle" onClick={async () => {
-                await axios.delete(`/api/dossiers/${r.id}`).catch((e) => setError(e?.response?.data?.error ?? e.message));
-                load();
-              }}>Delete</Button>
+              <div />
             </div>
             {r.summary && <div style={{ marginTop: 4 }}>{r.summary}</div>}
           </div>

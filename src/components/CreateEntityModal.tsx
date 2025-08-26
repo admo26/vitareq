@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import Modal from "@atlaskit/modal-dialog";
+import Modal, { ModalHeader, ModalTitle, ModalBody, ModalFooter, ModalTransition } from "@atlaskit/modal-dialog";
 import Button from "@atlaskit/button";
 import TextField from "@atlaskit/textfield";
 import TextArea from "@atlaskit/textarea";
@@ -12,9 +12,10 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onCreated?: (type: "requirement" | "dossier") => void;
+  forceSimple?: boolean;
 };
 
-export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props) {
+export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSimple }: Props) {
   const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
   const [entityType, setEntityType] = useState<"requirement" | "dossier">("requirement");
   const [submitting, setSubmitting] = useState(false);
@@ -27,6 +28,7 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
   const [owner, setOwner] = useState("");
   const [reqStatus, setReqStatus] = useState<"DRAFT" | "IN_REVIEW" | "APPROVED" | "ARCHIVED">("DRAFT");
   const [dueDate, setDueDate] = useState("");
+  const [jiraKey, setJiraKey] = useState("");
 
   // Dossier fields
   const [name, setName] = useState("");
@@ -41,6 +43,9 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
   const reqNumPattern = /^[A-Z]+-\d+$/;
   const trimmedReqNum = requirementNumber.trim();
   const reqNumValid = trimmedReqNum === "" || reqNumPattern.test(trimmedReqNum.toUpperCase());
+  const jiraKeyPattern = /^[A-Z]+-\d+$/;
+  const trimmedJiraKey = jiraKey.trim();
+  const jiraKeyValid = trimmedJiraKey === "" || jiraKeyPattern.test(trimmedJiraKey.toUpperCase());
 
   function resetFields() {
     setTitle("");
@@ -49,6 +54,7 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
     setOwner("");
     setReqStatus("DRAFT");
     setDueDate("");
+    setJiraKey("");
     setName("");
     setSummary("");
     setDosStatus("OPEN");
@@ -68,6 +74,10 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
     }
     if (!reqNumValid) {
       setError("Invalid requirement number format (e.g. ABC-123)");
+      return;
+    }
+    if (!jiraKeyValid) {
+      setError("Invalid Jira key format (e.g. ABC-123)");
       return;
     }
     setSubmitting(true);
@@ -91,6 +101,7 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
           owner: owner || undefined,
           status: reqStatus,
           dueDate: dueDate || undefined,
+          jiraKey: jiraKey || undefined,
         }, { headers });
       } else {
         await axios.post("/api/dossiers", {
@@ -109,24 +120,11 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
     }
   }
 
-  return (
-    <>
-      {isOpen && (
-        <Modal
-          onClose={() => {
-            resetFields();
-            onClose();
-          }}
-          heading="Create"
-          actions={[
-            { text: "Cancel", onClick: () => { resetFields(); onClose(); } },
-            { text: submitting ? "Creating…" : "Create", onClick: handleCreate, appearance: "primary", isDisabled: submitting || (entityType === "requirement" ? !title.trim() || !reqNumValid : !name.trim()) },
-          ]}
-        >
-          <div style={{ display: "grid", gap: 12 }}>
-            {error && (
-              <SectionMessage appearance="error">{error}</SectionMessage>
-            )}
+  const renderBody = () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {error && (
+        <SectionMessage appearance="error">{error}</SectionMessage>
+      )}
 
             <div>
               <label htmlFor="entity-type" style={{ display: "block", marginBottom: 4, fontSize: 12, color: "#6B778C" }}>Type</label>
@@ -150,6 +148,10 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
                 <TextField name="requirementNumber" value={requirementNumber} onChange={(e) => setRequirementNumber((e.target as HTMLInputElement).value)} onBlur={() => setRequirementNumber((v) => v.trim().toUpperCase())} placeholder="Requirement number (e.g. ABC-123)" isInvalid={!reqNumValid} />
                 {!reqNumValid && requirementNumber.trim() !== "" && (
                   <div style={{ color: "#DE350B", fontSize: 12 }}>Invalid format. Use ABC-123.</div>
+                )}
+                <TextField name="jiraKey" value={jiraKey} onChange={(e) => setJiraKey((e.target as HTMLInputElement).value)} onBlur={() => setJiraKey((v) => v.trim().toUpperCase())} placeholder="Linked Jira Work Item (e.g. ABC-123)" isInvalid={!jiraKeyValid} />
+                {!jiraKeyValid && jiraKey.trim() !== "" && (
+                  <div style={{ color: "#DE350B", fontSize: 12 }}>Invalid Jira key. Use ABC-123.</div>
                 )}
                 <TextField name="owner" value={owner} onChange={(e) => setOwner((e.target as HTMLInputElement).value)} placeholder="Owner" />
                 <div>
@@ -178,9 +180,49 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated }: Props)
                   </select>
                 </div>
               </>
-            )}
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {isOpen && forceSimple ? (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(9,30,66,0.54)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+          <div style={{ background: "#FFFFFF", color: "#172B4D", borderRadius: 8, padding: 16, width: 560, maxWidth: "90vw", maxHeight: "90vh", overflow: "auto", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
+            <div style={{ marginBottom: 12, fontSize: 18, fontWeight: 600 }}>Create</div>
+            {renderBody()}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
+              <Button appearance="subtle" onClick={() => { resetFields(); onClose(); }}>Cancel</Button>
+              <Button appearance="primary" onClick={handleCreate} isDisabled={submitting || (entityType === "requirement" ? !title.trim() || !reqNumValid : !name.trim())}>
+                {submitting ? "Creating…" : "Create"}
+              </Button>
+            </div>
           </div>
-        </Modal>
+        </div>
+      ) : (
+        <ModalTransition>
+          {isOpen ? (
+            <Modal
+              onClose={() => {
+                resetFields();
+                onClose();
+              }}
+            >
+              <ModalHeader>
+                <ModalTitle>Create</ModalTitle>
+              </ModalHeader>
+              <ModalBody>
+                {renderBody()}
+              </ModalBody>
+              <ModalFooter>
+                <Button appearance="subtle" onClick={() => { resetFields(); onClose(); }}>Cancel</Button>
+                <Button appearance="primary" onClick={handleCreate} isDisabled={submitting || (entityType === "requirement" ? !title.trim() || !reqNumValid : !name.trim())}>
+                  {submitting ? "Creating…" : "Create"}
+                </Button>
+              </ModalFooter>
+            </Modal>
+          ) : null}
+        </ModalTransition>
       )}
     </>
   );

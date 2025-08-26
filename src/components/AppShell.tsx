@@ -10,12 +10,12 @@ import TextField from "@atlaskit/textfield";
 export function AppShell({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const router = useRouter();
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       loginWithRedirect().catch(() => {});
     }
   }, [isLoading, isAuthenticated, loginWithRedirect]);
+  const router = useRouter();
   if (isLoading || !isAuthenticated) {
     return null;
   }
@@ -61,9 +61,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       {children}
+      
       <CreateEntityModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
+        forceSimple={true}
         onCreated={(type) => {
           setIsCreateOpen(false);
           router.push(type === "requirement" ? "/requirements" : "/dossiers");

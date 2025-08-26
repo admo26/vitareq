@@ -24,6 +24,7 @@ const RequirementUpdateSchema = z.object({
     .optional(),
   owner: z.string().min(1).optional(),
   dueDate: z.coerce.date().optional(),
+  jiraKey: z.string().regex(/^[A-Z]+-\d+$/i).nullable().optional(),
 });
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
@@ -45,6 +46,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       data: {
         ...parsed.data,
         requirementNumber: parsed.data.requirementNumber?.toUpperCase(),
+        jiraKey: parsed.data.jiraKey === null ? null : parsed.data.jiraKey?.toUpperCase(),
       },
     });
     return Response.json(updated);

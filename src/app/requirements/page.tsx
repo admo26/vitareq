@@ -18,6 +18,7 @@ type Requirement = {
   owner?: string | null;
   dueDate?: string | null;
   url?: string;
+  jiraKey?: string | null;
 };
 
 export default function RequirementsPage() {
@@ -25,6 +26,7 @@ export default function RequirementsPage() {
   const [items, setItems] = useState<Requirement[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<Requirement["status"] | "ALL">("ALL");
 
   type LozengeAppearance = "default" | "success" | "removed" | "inprogress" | "new" | "moved";
   const requirementStatusLabel: Record<Requirement["status"], string> = {
@@ -85,15 +87,34 @@ export default function RequirementsPage() {
         </div>
       )}
 
-      <div style={{ marginTop: 24, display: "grid", gap: 8 }}>
+      <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 8 }}>
+        <label htmlFor="req-status-filter" style={{ fontSize: 12, color: "#6B778C" }}>Filter status</label>
+        <select
+          id="req-status-filter"
+          name="req-status-filter"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+          style={{ height: 32, border: "1px solid #EBECF0", borderRadius: 3, padding: "4px 8px" }}
+        >
+          <option value="ALL">All</option>
+          <option value="DRAFT">Draft</option>
+          <option value="IN_REVIEW">In review</option>
+          <option value="APPROVED">Approved</option>
+          <option value="ARCHIVED">Archived</option>
+        </select>
+      </div>
+
+      <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
         {loading ? (
           <>
-            <Skeleton height={72} />
-            <Skeleton height={72} />
-            <Skeleton height={72} />
+            <Skeleton height={72} width="100%" />
+            <Skeleton height={72} width="100%" />
+            <Skeleton height={72} width="100%" />
           </>
-        ) : items.map((r) => (
-          <div key={r.id} style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4 }}>
+        ) : items
+          .filter((r) => statusFilter === "ALL" ? true : r.status === statusFilter)
+          .map((r) => (
+          <div key={r.id} onClick={() => window.location.assign(`/requirements/${r.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4, cursor: "pointer" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <strong>{r.requirementNumber ? `[${r.requirementNumber}] ` : ""}{r.title}</strong>
@@ -103,12 +124,10 @@ export default function RequirementsPage() {
                   </Lozenge>
                   {r.dueDate && <span> · Due: {new Date(r.dueDate).toLocaleDateString()}</span>}
                   {r.owner && <span> · Owner: {r.owner}</span>}
+                  {r.jiraKey && <span> · Jira: {r.jiraKey}</span>}
                 </div>
               </div>
-              <Button appearance="subtle" onClick={async () => {
-                await axios.delete(`/api/requirements/${r.id}`).catch((e) => setError(e?.response?.data?.error ?? e.message));
-                load();
-              }}>Delete</Button>
+              <div />
             </div>
             {r.description && <div style={{ marginTop: 4 }}>{r.description}</div>}
           </div>

@@ -23,13 +23,7 @@ type Dossier = {
   status: "OPEN" | "SUBMITTED" | "APPROVED" | "REJECTED" | "ARCHIVED";
 };
 
-// Live requirements loaded from API
-
-const mockDossiers: Dossier[] = [
-  { id: "d1", name: "Vitamin D3 Gummies Launch", status: "OPEN" },
-  { id: "d2", name: "Q3 GMP Internal Audit", status: "SUBMITTED" },
-  { id: "d3", name: "Labeling Compliance 2025", status: "APPROVED" },
-];
+// Live data loaded from API
 
 function getStats(reqs: Requirement[]) {
   const total = reqs.length;
@@ -57,6 +51,7 @@ function getStatusBreakdown(reqs: Requirement[]) {
 export default function Home() {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [items, setItems] = useState<Requirement[]>([]);
+  const [dossiers, setDossiers] = useState<Dossier[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -64,6 +59,7 @@ export default function Home() {
     setLoading(true);
     if (!isAuthenticated) {
       setItems([]);
+      setDossiers([]);
       setLoading(false);
       return;
     }
@@ -84,6 +80,13 @@ export default function Home() {
     if (res) {
       setError(null);
       setItems(res.data);
+    }
+    // Load dossiers as well
+    const resD = await axios
+      .get<Dossier[]>("/api/dossiers", { headers })
+      .catch(() => null);
+    if (resD) {
+      setDossiers(resD.data);
     }
     setLoading(false);
   }, [getAccessTokenSilently, isAuthenticated]);
@@ -205,7 +208,7 @@ export default function Home() {
               </div>
               <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
                 {recent.map((r) => (
-                  <div key={r.id} style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10 }}>
+                  <div key={r.id} onClick={() => window.location.assign(`/requirements/${r.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10, cursor: "pointer" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
                         <strong>[{r.requirementNumber}] {r.title}</strong>
@@ -217,7 +220,6 @@ export default function Home() {
                           {r.dueDate ? <span> · Due: {new Date(r.dueDate).toLocaleDateString()}</span> : null}
                         </div>
                       </div>
-                      <Link href={`/requirements`}>Open</Link>
                     </div>
                   </div>
                 ))}
@@ -265,14 +267,12 @@ export default function Home() {
               <Link href="/dossiers" style={{ fontSize: 12 }}>View all</Link>
             </div>
             <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-              {/* Keeping mock dossiers for now; can wire to live later */}
-              {mockDossiers.map((d) => (
-                <div key={d.id} style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {dossiers.slice(0, 5).map((d) => (
+                <div key={d.id} onClick={() => window.location.assign(`/dossiers/${d.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                   <div>
                     <strong>{d.name}</strong>
                     <div style={{ color: "#6B778C", fontSize: 12, marginTop: 2 }}>Status: {d.status}</div>
                   </div>
-                  <Link href={`/dossiers`}>Open</Link>
                 </div>
               ))}
             </div>
@@ -280,104 +280,7 @@ export default function Home() {
         </>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 16 }}>
-        <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12 }}>
-          <div style={{ color: "#6B778C", fontSize: 12 }}>Total requirements</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 6 }}>{stats.total}</div>
-        </div>
-        <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12 }}>
-          <div style={{ color: "#6B778C", fontSize: 12 }}>In review</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 6 }}>{stats.inReview}</div>
-        </div>
-        <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12 }}>
-          <div style={{ color: "#6B778C", fontSize: 12 }}>Approved</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 6 }}>{stats.approved}</div>
-        </div>
-        <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12 }}>
-          <div style={{ color: "#6B778C", fontSize: 12 }}>Overdue</div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginTop: 6, color: stats.overdue > 0 ? "#DE350B" : undefined }}>{stats.overdue}</div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginTop: 16 }}>
-        <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Recent requirements</h3>
-            <Link href="/requirements" style={{ fontSize: 12 }}>View all</Link>
-          </div>
-          <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-            {recent.map((r) => (
-              <div key={r.id} style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <strong>[{r.requirementNumber}] {r.title}</strong>
-                    <div style={{ color: "#6B778C", fontSize: 12, marginTop: 2, display: "flex", gap: 8, alignItems: "center" }}>
-                      <Lozenge appearance={requirementStatusAppearance[r.status]}>
-                        {requirementStatusLabel[r.status]}
-                      </Lozenge>
-                      <span> · Owner: {r.owner}</span>
-                      {r.dueDate ? <span> · Due: {new Date(r.dueDate as string).toLocaleDateString()}</span> : null}
-                    </div>
-                  </div>
-                  <Link href={`/requirements`}>Open</Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ display: "grid", gap: 16 }}>
-          <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Status breakdown</h3>
-            <div style={{ marginTop: 10 }}>
-              <div style={{ height: 10, width: "100%", background: "#F4F5F7", borderRadius: 999, overflow: "hidden", display: "flex" }}>
-                <div title={`DRAFT ${breakdown.percents.DRAFT}%`} style={{ width: `${breakdown.percents.DRAFT}%`, background: "#B3D4FF" }} />
-                <div title={`IN_REVIEW ${breakdown.percents.IN_REVIEW}%`} style={{ width: `${breakdown.percents.IN_REVIEW}%`, background: "#FFE380" }} />
-                <div title={`APPROVED ${breakdown.percents.APPROVED}%`} style={{ width: `${breakdown.percents.APPROVED}%`, background: "#57D9A3" }} />
-                <div title={`ARCHIVED ${breakdown.percents.ARCHIVED}%`} style={{ width: `${breakdown.percents.ARCHIVED}%`, background: "#DFE1E6" }} />
-              </div>
-              <div style={{ display: "flex", gap: 12, marginTop: 8, color: "#6B778C", fontSize: 12 }}>
-                <span>DRAFT {breakdown.counts.DRAFT}</span>
-                <span>IN_REVIEW {breakdown.counts.IN_REVIEW}</span>
-                <span>APPROVED {breakdown.counts.APPROVED}</span>
-                <span>ARCHIVED {breakdown.counts.ARCHIVED}</span>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Upcoming deadlines</h3>
-            <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-              {upcoming.map((r) => (
-                <div key={r.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    <span style={{ color: "#6B778C" }}>[{r.requirementNumber}]</span> {r.title}
-                  </div>
-                  <div style={{ fontSize: 12, color: "#6B778C" }}>{r.dueDate ? new Date(r.dueDate as string).toLocaleDateString() : ""}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12, marginTop: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Dossiers</h3>
-          <Link href="/dossiers" style={{ fontSize: 12 }}>View all</Link>
-        </div>
-        <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-          {mockDossiers.map((d) => (
-            <div key={d.id} style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <strong>{d.name}</strong>
-                <div style={{ color: "#6B778C", fontSize: 12, marginTop: 2 }}>Status: {d.status}</div>
-              </div>
-              <Link href={`/dossiers`}>Open</Link>
-            </div>
-          ))}
-        </div>
-      </div>
+      
     </div>
   );
 }

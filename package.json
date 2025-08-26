@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@atlaskit/atlassian-navigation": "^5.3.12",
+    "@atlaskit/breadcrumbs": "15.3.0",
     "@atlaskit/button": "^23.4.1",
     "@atlaskit/css-reset": "^7.3.4",
     "@atlaskit/flag": "^17.3.2",

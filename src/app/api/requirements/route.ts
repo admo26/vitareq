@@ -26,6 +26,7 @@ const RequirementCreateSchema = z.object({
     .optional(),
   owner: z.string().min(1).optional(),
   dueDate: z.coerce.date().optional(),
+  jiraKey: z.string().regex(/^[A-Z]+-\d+$/i).optional(),
 });
 
 export async function POST(req: Request) {
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
         requirementNumber: parsed.data.requirementNumber?.toUpperCase(),
         owner: parsed.data.owner,
         dueDate: parsed.data.dueDate,
+        jiraKey: parsed.data.jiraKey?.toUpperCase(),
       },
     });
     const { origin } = new URL(req.url);
