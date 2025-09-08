@@ -37,7 +37,7 @@ const RequirementCreateSchema = z.object({
   title: z.string().min(1),
   description: z.string().nullable().optional(),
   status: z.enum(["DRAFT", "IN_REVIEW", "APPROVED", "ARCHIVED"]).optional(),
-  dossierId: z.string().nullable().optional(),
+  riskId: z.string().nullable().optional(),
   requirementNumber: z
     .string()
     .regex(/^[A-Z]+-\d+$/i, "Invalid requirement number format (e.g. ABC-123)")
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
         title: parsed.data.title,
         description: parsed.data.description,
         status: parsed.data.status ?? "DRAFT",
-        dossierId: parsed.data.dossierId,
+        riskId: parsed.data.riskId,
         requirementNumber: parsed.data.requirementNumber?.toUpperCase(),
         owner: parsed.data.owner,
         dueDate: parsed.data.dueDate,

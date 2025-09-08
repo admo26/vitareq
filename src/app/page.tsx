@@ -17,7 +17,7 @@ type Requirement = {
   createdAt: string;
 };
 
-type Dossier = {
+type Risk = {
   id: string;
   name: string;
   status: "OPEN" | "SUBMITTED" | "APPROVED" | "REJECTED" | "ARCHIVED";
@@ -51,7 +51,7 @@ function getStatusBreakdown(reqs: Requirement[]) {
 export default function Home() {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [items, setItems] = useState<Requirement[]>([]);
-  const [dossiers, setDossiers] = useState<Dossier[]>([]);
+  const [risks, setRisks] = useState<Risk[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -59,7 +59,7 @@ export default function Home() {
     setLoading(true);
     if (!isAuthenticated) {
       setItems([]);
-      setDossiers([]);
+      setRisks([]);
       setLoading(false);
       return;
     }
@@ -81,12 +81,12 @@ export default function Home() {
       setError(null);
       setItems(res.data);
     }
-    // Load dossiers as well
+    // Load risks as well
     const resD = await axios
-      .get<Dossier[]>("/api/dossiers", { headers })
+      .get<Risk[]>("/api/risks", { headers })
       .catch(() => null);
     if (resD) {
-      setDossiers(resD.data);
+      setRisks(resD.data);
     }
     setLoading(false);
   }, [getAccessTokenSilently, isAuthenticated]);
@@ -263,12 +263,12 @@ export default function Home() {
 
           <div style={{ border: "1px solid #EBECF0", borderRadius: 6, padding: 12, marginTop: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Dossiers</h3>
-              <Link href="/dossiers" style={{ fontSize: 12 }}>View all</Link>
+              <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Risks</h3>
+              <Link href="/risks" style={{ fontSize: 12 }}>View all</Link>
             </div>
             <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-              {dossiers.slice(0, 5).map((d) => (
-                <div key={d.id} onClick={() => window.location.assign(`/dossiers/${d.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+              {risks.slice(0, 5).map((d) => (
+                <div key={d.id} onClick={() => window.location.assign(`/risks/${d.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", borderRadius: 4, padding: 10, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                   <div>
                     <strong>{d.name}</strong>
                     <div style={{ color: "#6B778C", fontSize: 12, marginTop: 2 }}>Status: {d.status}</div>

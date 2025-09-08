@@ -29,8 +29,8 @@ Open `http://localhost:3000`.
 
 - `GET /api/requirements` | `POST /api/requirements`
 - `GET /api/requirements/:id` | `PUT /api/requirements/:id` | `DELETE /api/requirements/:id`
-- `GET /api/dossiers` | `POST /api/dossiers`
-- `GET /api/dossiers/:id` | `PUT /api/dossiers/:id` | `DELETE /api/dossiers/:id`
+- `GET /api/risks` | `POST /api/risks`
+- `GET /api/risks/:id` | `PUT /api/risks/:id` | `DELETE /api/risks/:id`
 
 Auth: In prod, send `Authorization: Bearer <access_token>` (Auth0 audience). Locally, auth is skipped with `SKIP_AUTH=true`.
 
@@ -38,7 +38,7 @@ Auth: In prod, send `Authorization: Bearer <access_token>` (Auth0 audience). Loc
 
 - Atlaskit components with simple pages:
   - `/requirements` – list/create Requirements
-  - `/dossiers` – list/create Dossiers
+  - `/risks` – list/create Risks
 
 ## Deploy to Vercel
 

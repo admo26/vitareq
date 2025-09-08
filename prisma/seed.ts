@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 async function main() {
   // Clean existing (idempotent-ish demo reset)
   await prisma.requirement.deleteMany();
-  await prisma.dossier.deleteMany();
+  await prisma.risk.deleteMany();
 
-  // Generate 30 dossiers
-  const dossierBaseNames = [
+  // Generate 30 risks
+  const riskBaseNames = [
     "Vitamin D3 Gummies Launch",
     "Q%Q GMP Internal Audit",
     "Labeling Compliance",
@@ -20,24 +20,24 @@ async function main() {
     "Supplier Qualification",
     "Elderberry SKU Refresh",
   ];
-  const dossierStatuses: ("OPEN" | "SUBMITTED" | "APPROVED" | "REJECTED" | "ARCHIVED")[] = [
+  const riskStatuses: ("OPEN" | "SUBMITTED" | "APPROVED" | "REJECTED" | "ARCHIVED")[] = [
     "OPEN",
     "SUBMITTED",
     "APPROVED",
     "REJECTED",
     "ARCHIVED",
   ];
-  const createdDossiers: { id: string }[] = [];
+  const createdRisks: { id: string }[] = [];
   for (let i = 1; i <= 30; i++) {
-    const base = dossierBaseNames[i % dossierBaseNames.length].replace("%Q", `Q${((i % 4) || 4)}`);
+    const base = riskBaseNames[i % riskBaseNames.length].replace("%Q", `Q${((i % 4) || 4)}`);
     const name = `${base} ${2024 + Math.floor(i / 12)}`.trim();
-    const status = dossierStatuses[i % dossierStatuses.length];
-    const summary = `${name} - summary of activities and compliance artifacts.`;
-    const d = await prisma.dossier.create({
+    const status = riskStatuses[i % riskStatuses.length];
+    const summary = `${name} - risk overview, mitigations and monitoring.`;
+    const d = await prisma.risk.create({
       data: { name, status, summary },
       select: { id: true },
     });
-    createdDossiers.push(d);
+    createdRisks.push(d);
   }
 
   // Generate 30 requirements
@@ -83,13 +83,13 @@ async function main() {
     const requirementNumber = `SUPP-${300 + i}`;
     const owner = owners[i % owners.length];
     const dueDate = new Date(Date.now() + (i - 15) * 86400000);
-    const dossierId = createdDossiers[(i * 7) % createdDossiers.length]?.id;
+    const riskId = createdRisks[(i * 7) % createdRisks.length]?.id;
     await prisma.requirement.create({
-      data: { title, description, status, requirementNumber, owner, dueDate, dossierId },
+      data: { title, description, status, requirementNumber, owner, dueDate, riskId },
     });
   }
 
-  console.log("Seed completed with 30 dossiers and 30 requirements.");
+  console.log("Seed completed with 30 risks and 30 requirements.");
 }
 
 main()

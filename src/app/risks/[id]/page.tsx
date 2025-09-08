@@ -9,7 +9,7 @@ import Skeleton from "@atlaskit/skeleton";
 import Lozenge from "@atlaskit/lozenge";
 import axios from "axios";
 
-type Dossier = {
+type Risk = {
   id: string;
   name: string;
   summary?: string | null;
@@ -17,11 +17,11 @@ type Dossier = {
   createdAt: string;
 };
 
-export default function DossierDetailPage() {
+export default function RiskDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
-  const [item, setItem] = useState<Dossier | null>(null);
+  const [item, setItem] = useState<Risk | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +39,7 @@ export default function DossierDetailPage() {
         }
       } catch {}
       const res = await axios
-        .get<Dossier>(`/api/dossiers/${params.id}`, { headers })
+        .get<Risk>(`/api/risks/${params.id}`, { headers })
         .catch(async (e) => {
           const status = e?.response?.status;
           if (status === 401 && !isAuthenticated) {
@@ -63,7 +63,7 @@ export default function DossierDetailPage() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Breadcrumbs>
           <BreadcrumbsItem href="/" text="Dashboard" />
-          <BreadcrumbsItem href="/dossiers" text="Dossiers" />
+          <BreadcrumbsItem href="/risks" text="Risks" />
           <BreadcrumbsItem text="Detail" />
         </Breadcrumbs>
       </div>
@@ -110,8 +110,8 @@ export default function DossierDetailPage() {
                   await loginWithRedirect();
                   return;
                 }
-                await axios.delete(`/api/dossiers/${item.id}`, { headers });
-                router.push("/dossiers");
+                await axios.delete(`/api/risks/${item.id}`, { headers });
+                router.push("/risks");
               } catch (err: any) {
                 setError(err?.response?.data?.error ?? err?.message ?? "Failed to delete");
               }

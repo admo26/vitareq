@@ -8,7 +8,7 @@ import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import Skeleton from "@atlaskit/skeleton";
 
-type Dossier = {
+type Risk = {
   id: string;
   name: string;
   summary?: string | null;
@@ -16,12 +16,12 @@ type Dossier = {
   createdAt: string;
 };
 
-export default function DossiersPage() {
+export default function RisksPage() {
   const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
-  const [items, setItems] = useState<Dossier[]>([]);
+  const [items, setItems] = useState<Risk[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<Dossier["status"] | "ALL">("ALL");
+  const [statusFilter, setStatusFilter] = useState<Risk["status"] | "ALL">("ALL");
 
   async function load() {
     setLoading(true);
@@ -35,7 +35,7 @@ export default function DossiersPage() {
       }
     } catch {}
     const res = await axios
-      .get<Dossier>("/api/dossiers", { headers })
+      .get<Risk>("/api/risks", { headers })
       .catch(async (e) => {
         const status = e?.response?.status;
         if (status === 401 && !isAuthenticated) {
@@ -62,7 +62,7 @@ export default function DossiersPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2 style={{ fontSize: 20, fontWeight: 600 }}>Dossiers</h2>
+      <h2 style={{ fontSize: 20, fontWeight: 600 }}>Risks</h2>
       {error && (
         <div style={{ marginTop: 12 }}>
           <SectionMessage appearance="error">{error}</SectionMessage>
@@ -97,7 +97,7 @@ export default function DossiersPage() {
         ) : items
           .filter((r) => statusFilter === "ALL" ? true : r.status === statusFilter)
           .map((r) => (
-          <div key={r.id} onClick={() => window.location.assign(`/dossiers/${r.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4, cursor: "pointer" }}>
+          <div key={r.id} onClick={() => window.location.assign(`/risks/${r.id}`)} className="clickable-card" style={{ border: "1px solid #EBECF0", padding: 12, borderRadius: 4, cursor: "pointer" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <strong>{r.name}</strong>
@@ -123,4 +123,5 @@ export default function DossiersPage() {
     </div>
   );
 }
+
 

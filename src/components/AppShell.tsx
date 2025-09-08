@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           Vitareq
         </Link>
         <Link href="/requirements">Requirements</Link>
-        <Link href="/dossiers">Dossiers</Link>
+        <Link href="/risks">Risks</Link>
         <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 260 }}>
             <TextField name="nav-search" placeholder="Search" />
@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         forceSimple={true}
         onCreated={(type) => {
           setIsCreateOpen(false);
-          router.push(type === "requirement" ? "/requirements" : "/dossiers");
+          router.push(type === "requirement" ? "/requirements" : "/risks");
         }}
       />
     </>

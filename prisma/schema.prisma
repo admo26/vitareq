@@ -25,15 +25,15 @@ model Requirement {
   jiraKey     String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
-  dossierId   String?
-  dossier     Dossier?           @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+  riskId      String?
+  risk        Risk?              @relation(fields: [riskId], references: [id], onDelete: SetNull)
 }
 
-model Dossier {
+model Risk {
   id           String           @id @default(cuid())
   name         String
   summary      String?
-  status       DossierStatus    @default(OPEN)
+  status       RiskStatus       @default(OPEN)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   requirements Requirement[]
@@ -46,7 +46,7 @@ enum RequirementStatus {
   ARCHIVED
 }
 
-enum DossierStatus {
+enum RiskStatus {
   OPEN
   SUBMITTED
   APPROVED

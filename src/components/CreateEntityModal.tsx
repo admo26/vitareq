@@ -11,13 +11,13 @@ import axios from "axios";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onCreated?: (type: "requirement" | "dossier") => void;
+  onCreated?: (type: "requirement" | "risk") => void;
   forceSimple?: boolean;
 };
 
 export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSimple }: Props) {
   const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } = useAuth0();
-  const [entityType, setEntityType] = useState<"requirement" | "dossier">("requirement");
+  const [entityType, setEntityType] = useState<"requirement" | "risk">("requirement");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,14 +30,14 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
   const [dueDate, setDueDate] = useState("");
   const [jiraKey, setJiraKey] = useState("");
 
-  // Dossier fields
+  // Risk fields
   const [name, setName] = useState("");
   const [summary, setSummary] = useState("");
   const [dosStatus, setDosStatus] = useState<"OPEN" | "SUBMITTED" | "APPROVED" | "REJECTED" | "ARCHIVED">("OPEN");
 
   const typeOptions = useMemo(() => ([
     { label: "Requirement", value: "requirement" },
-    { label: "Dossier", value: "dossier" },
+    { label: "Risk", value: "risk" },
   ]), []);
 
   const reqNumPattern = /^[A-Z]+-\d+$/;
@@ -68,7 +68,7 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
       setError("Title is required");
       return;
     }
-    if (entityType === "dossier" && !name.trim()) {
+    if (entityType === "risk" && !name.trim()) {
       setError("Name is required");
       return;
     }
@@ -104,7 +104,7 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
           jiraKey: jiraKey || undefined,
         }, { headers });
       } else {
-        await axios.post("/api/dossiers", {
+        await axios.post("/api/risks", {
           name,
           summary,
           status: dosStatus,
