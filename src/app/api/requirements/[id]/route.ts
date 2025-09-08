@@ -20,7 +20,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 const RequirementUpdateSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().nullable().optional(),
-  status: z.enum(["DRAFT", "IN_REVIEW", "APPROVED", "ARCHIVED"]).optional(),
+  status: z.enum(["DRAFT", "IN_REVIEW", "IN_PROGRESS", "TO_DO", "DONE", "APPROVED", "ARCHIVED"]).optional(),
   riskId: z.string().nullable().optional(),
   requirementNumber: z
     .string()

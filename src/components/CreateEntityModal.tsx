@@ -26,14 +26,14 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
   const [description, setDescription] = useState("");
   const [requirementNumber, setRequirementNumber] = useState("");
   const [owner, setOwner] = useState("");
-  const [reqStatus, setReqStatus] = useState<"DRAFT" | "IN_REVIEW" | "APPROVED" | "ARCHIVED">("DRAFT");
+  const [reqStatus, setReqStatus] = useState<"DRAFT" | "IN_REVIEW" | "IN_PROGRESS" | "TO_DO" | "DONE" | "APPROVED" | "ARCHIVED">("DRAFT");
   const [dueDate, setDueDate] = useState("");
   const [jiraKey, setJiraKey] = useState("");
 
   // Risk fields
   const [name, setName] = useState("");
   const [summary, setSummary] = useState("");
-  const [dosStatus, setDosStatus] = useState<"OPEN" | "SUBMITTED" | "APPROVED" | "REJECTED" | "ARCHIVED">("OPEN");
+  const [dosStatus, setDosStatus] = useState<"OPEN" | "SUBMITTED" | "IN_PROGRESS" | "TO_DO" | "DONE" | "APPROVED" | "REJECTED" | "ARCHIVED">("OPEN");
 
   const typeOptions = useMemo(() => ([
     { label: "Requirement", value: "requirement" },
@@ -159,6 +159,9 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
                   <select id="req-status" name="req-status" value={reqStatus} onChange={(e) => setReqStatus(e.target.value as any)} style={{ height: 36, border: "1px solid #EBECF0", borderRadius: 3, padding: "6px 8px", width: "100%" }}>
                     <option value="DRAFT">Draft</option>
                     <option value="IN_REVIEW">In review</option>
+                    <option value="TO_DO">To do</option>
+                    <option value="IN_PROGRESS">In progress</option>
+                    <option value="DONE">Done</option>
                     <option value="APPROVED">Approved</option>
                     <option value="ARCHIVED">Archived</option>
                   </select>
@@ -174,6 +177,9 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
                   <select id="dos-status" name="dos-status" value={dosStatus} onChange={(e) => setDosStatus(e.target.value as any)} style={{ height: 36, border: "1px solid #EBECF0", borderRadius: 3, padding: "6px 8px", width: "100%" }}>
                     <option value="OPEN">Open</option>
                     <option value="SUBMITTED">Submitted</option>
+                    <option value="TO_DO">To do</option>
+                    <option value="IN_PROGRESS">In progress</option>
+                    <option value="DONE">Done</option>
                     <option value="APPROVED">Approved</option>
                     <option value="REJECTED">Rejected</option>
                     <option value="ARCHIVED">Archived</option>

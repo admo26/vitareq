@@ -12,7 +12,7 @@ type Risk = {
   id: string;
   name: string;
   summary?: string | null;
-  status: "OPEN" | "SUBMITTED" | "APPROVED" | "REJECTED" | "ARCHIVED";
+  status: "OPEN" | "SUBMITTED" | "IN_PROGRESS" | "TO_DO" | "DONE" | "APPROVED" | "REJECTED" | "ARCHIVED";
   createdAt: string;
 };
 
@@ -81,6 +81,9 @@ export default function RisksPage() {
           <option value="ALL">All</option>
           <option value="OPEN">Open</option>
           <option value="SUBMITTED">Submitted</option>
+          <option value="IN_PROGRESS">In progress</option>
+          <option value="TO_DO">To do</option>
+          <option value="DONE">Done</option>
           <option value="APPROVED">Approved</option>
           <option value="REJECTED">Rejected</option>
           <option value="ARCHIVED">Archived</option>
@@ -102,13 +105,16 @@ export default function RisksPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <strong>{r.name}</strong>
                 <Lozenge appearance={
-                  r.status === "APPROVED" ? "success" :
-                  r.status === "OPEN" ? "new" :
-                  r.status === "SUBMITTED" ? "inprogress" :
+                  r.status === "APPROVED" || r.status === "DONE" ? "success" :
+                  r.status === "OPEN" || r.status === "TO_DO" ? "new" :
+                  r.status === "SUBMITTED" || r.status === "IN_PROGRESS" ? "inprogress" :
                   r.status === "REJECTED" ? "removed" : "default"
                 }>
                   {r.status === "OPEN" ? "Open" :
                    r.status === "SUBMITTED" ? "Submitted" :
+                   r.status === "IN_PROGRESS" ? "In progress" :
+                   r.status === "TO_DO" ? "To do" :
+                   r.status === "DONE" ? "Done" :
                    r.status === "APPROVED" ? "Approved" :
                    r.status === "REJECTED" ? "Rejected" :
                    "Archived"}

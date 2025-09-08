@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 const RiskUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   summary: z.string().nullable().optional(),
-  status: z.enum(["OPEN", "SUBMITTED", "APPROVED", "REJECTED", "ARCHIVED"]).optional(),
+  status: z.enum(["OPEN", "SUBMITTED", "IN_PROGRESS", "TO_DO", "DONE", "APPROVED", "REJECTED", "ARCHIVED"]).optional(),
 });
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {

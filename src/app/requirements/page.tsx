@@ -12,7 +12,7 @@ type Requirement = {
   id: string;
   title: string;
   description?: string | null;
-  status: "DRAFT" | "IN_REVIEW" | "APPROVED" | "ARCHIVED";
+  status: "DRAFT" | "IN_REVIEW" | "IN_PROGRESS" | "TO_DO" | "DONE" | "APPROVED" | "ARCHIVED";
   createdAt: string;
   requirementNumber?: string | null;
   owner?: string | null;
@@ -32,12 +32,18 @@ export default function RequirementsPage() {
   const requirementStatusLabel: Record<Requirement["status"], string> = {
     DRAFT: "Draft",
     IN_REVIEW: "In review",
+    IN_PROGRESS: "In progress",
+    TO_DO: "To do",
+    DONE: "Done",
     APPROVED: "Approved",
     ARCHIVED: "Archived",
   };
   const requirementStatusAppearance: Record<Requirement["status"], LozengeAppearance> = {
     DRAFT: "new",
     IN_REVIEW: "inprogress",
+    IN_PROGRESS: "inprogress",
+    TO_DO: "new",
+    DONE: "success",
     APPROVED: "success",
     ARCHIVED: "removed",
   };
@@ -99,6 +105,9 @@ export default function RequirementsPage() {
           <option value="ALL">All</option>
           <option value="DRAFT">Draft</option>
           <option value="IN_REVIEW">In review</option>
+          <option value="TO_DO">To do</option>
+          <option value="IN_PROGRESS">In progress</option>
+          <option value="DONE">Done</option>
           <option value="APPROVED">Approved</option>
           <option value="ARCHIVED">Archived</option>
         </select>

@@ -42,6 +42,9 @@ model Risk {
 enum RequirementStatus {
   DRAFT
   IN_REVIEW
+  IN_PROGRESS
+  TO_DO
+  DONE
   APPROVED
   ARCHIVED
 }
@@ -49,6 +52,9 @@ enum RequirementStatus {
 enum RiskStatus {
   OPEN
   SUBMITTED
+  IN_PROGRESS
+  TO_DO
+  DONE
   APPROVED
   REJECTED
   ARCHIVED
