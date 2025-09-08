@@ -9,6 +9,7 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const jiraKeyParam = url.searchParams.get("jiraKey");
+  const limitParam = url.searchParams.get("limit");
   const { origin } = url;
 
   if (jiraKeyParam) {
@@ -22,8 +23,10 @@ export async function GET(req: Request) {
     });
   }
 
+  const take = limitParam ? Math.max(0, Number(limitParam)) || undefined : undefined;
   const items = await prisma.requirement.findMany({
     orderBy: { createdAt: "desc" },
+    take,
   });
   const withUrls = items.map((r) => ({
     ...r,

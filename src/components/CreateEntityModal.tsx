@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Modal, { ModalHeader, ModalTitle, ModalBody, ModalFooter, ModalTransition } from "@atlaskit/modal-dialog";
 import Button from "@atlaskit/button";
 import TextField from "@atlaskit/textfield";
@@ -62,6 +62,19 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
     setError(null);
   }
 
+  async function suggestNextRequirementNumber(headers: Record<string, string>) {
+    try {
+      const res = await axios.get<Array<{ requirementNumber?: string }>>("/api/requirements?limit=1", { headers });
+      const lastNum = res.data?.[0]?.requirementNumber || "";
+      const match = lastNum.match(/^(.*?)-(\d+)$/);
+      if (match) {
+        const prefix = match[1];
+        const num = String(Number(match[2]) + 1).padStart(match[2].length, "0");
+        setRequirementNumber(`${prefix}-${num}`);
+      }
+    } catch {}
+  }
+
   async function handleCreate() {
     setError(null);
     if (entityType === "requirement" && !title.trim()) {
@@ -93,6 +106,11 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
         return;
       }
 
+      // Suggest next requirement number on first open of requirement type
+      if (entityType === "requirement" && !requirementNumber) {
+        await suggestNextRequirementNumber(headers);
+      }
+
       if (entityType === "requirement") {
         await axios.post("/api/requirements", {
           title,
@@ -119,6 +137,22 @@ export default function CreateEntityModal({ isOpen, onClose, onCreated, forceSim
       setSubmitting(false);
     }
   }
+
+  // Prefill requirement number when opening modal or switching to requirement type
+  useEffect(() => {
+    (async () => {
+      if (!isOpen) return;
+      if (entityType !== "requirement") return;
+      if (requirementNumber) return;
+      try {
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE },
+        });
+        const headers = { Authorization: `Bearer ${token}` } as Record<string, string>;
+        await suggestNextRequirementNumber(headers);
+      } catch {}
+    })();
+  }, [isOpen, entityType, requirementNumber, getAccessTokenSilently]);
 
   const renderBody = () => (
     <div style={{ display: "grid", gap: 12 }}>
