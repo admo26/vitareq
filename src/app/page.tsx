@@ -11,7 +11,7 @@ type Requirement = {
   id: string;
   title: string;
   requirementNumber?: string | null;
-  status: "DRAFT" | "IN_REVIEW" | "APPROVED" | "ARCHIVED";
+  status: "DRAFT" | "IN_REVIEW" | "IN_PROGRESS" | "TO_DO" | "DONE" | "APPROVED" | "ARCHIVED";
   owner?: string | null;
   dueDate?: string | null; // ISO date
   createdAt: string;
@@ -34,14 +34,17 @@ function getStats(reqs: Requirement[]) {
 }
 
 function getStatusBreakdown(reqs: Requirement[]) {
-  const counts: Record<Requirement["status"], number> = { DRAFT: 0, IN_REVIEW: 0, APPROVED: 0, ARCHIVED: 0 };
+  const counts: Record<Requirement["status"], number> = { DRAFT: 0, IN_REVIEW: 0, IN_PROGRESS: 0, TO_DO: 0, DONE: 0, APPROVED: 0, ARCHIVED: 0 };
   reqs.forEach((r) => { counts[r.status] += 1; });
   const total = reqs.length || 1;
   return {
     counts,
     percents: {
       DRAFT: Math.round((counts.DRAFT / total) * 100),
+      TO_DO: Math.round((counts.TO_DO / total) * 100),
+      IN_PROGRESS: Math.round((counts.IN_PROGRESS / total) * 100),
       IN_REVIEW: Math.round((counts.IN_REVIEW / total) * 100),
+      DONE: Math.round((counts.DONE / total) * 100),
       APPROVED: Math.round((counts.APPROVED / total) * 100),
       ARCHIVED: Math.round((counts.ARCHIVED / total) * 100),
     },
@@ -105,13 +108,19 @@ export default function Home() {
 
   const requirementStatusLabel: Record<Requirement["status"], string> = {
     DRAFT: "Draft",
+    TO_DO: "To do",
+    IN_PROGRESS: "In progress",
     IN_REVIEW: "In review",
+    DONE: "Done",
     APPROVED: "Approved",
     ARCHIVED: "Archived",
   };
   const requirementStatusAppearance: Record<Requirement["status"], "default" | "success" | "removed" | "inprogress" | "new" | "moved"> = {
     DRAFT: "new",
+    TO_DO: "new",
+    IN_PROGRESS: "inprogress",
     IN_REVIEW: "inprogress",
+    DONE: "success",
     APPROVED: "success",
     ARCHIVED: "removed",
   };
@@ -231,16 +240,22 @@ export default function Home() {
                 <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Status breakdown</h3>
                 <div style={{ marginTop: 10 }}>
                   <div style={{ height: 10, width: "100%", background: "#F4F5F7", borderRadius: 999, overflow: "hidden", display: "flex" }}>
-                    <div title={`DRAFT ${breakdown.percents.DRAFT}%`} style={{ width: `${breakdown.percents.DRAFT}%`, background: "#B3D4FF" }} />
-                    <div title={`IN_REVIEW ${breakdown.percents.IN_REVIEW}%`} style={{ width: `${breakdown.percents.IN_REVIEW}%`, background: "#FFE380" }} />
-                    <div title={`APPROVED ${breakdown.percents.APPROVED}%`} style={{ width: `${breakdown.percents.APPROVED}%`, background: "#57D9A3" }} />
-                    <div title={`ARCHIVED ${breakdown.percents.ARCHIVED}%`} style={{ width: `${breakdown.percents.ARCHIVED}%`, background: "#DFE1E6" }} />
+                    <div title={`${requirementStatusLabel.DRAFT} ${breakdown.percents.DRAFT}%`} style={{ width: `${breakdown.percents.DRAFT}%`, background: "#B3D4FF" }} />
+                    <div title={`${requirementStatusLabel.TO_DO} ${breakdown.percents.TO_DO}%`} style={{ width: `${breakdown.percents.TO_DO}%`, background: "#B3F5D9" }} />
+                    <div title={`${requirementStatusLabel.IN_PROGRESS} ${breakdown.percents.IN_PROGRESS}%`} style={{ width: `${breakdown.percents.IN_PROGRESS}%`, background: "#FFE380" }} />
+                    <div title={`${requirementStatusLabel.IN_REVIEW} ${breakdown.percents.IN_REVIEW}%`} style={{ width: `${breakdown.percents.IN_REVIEW}%`, background: "#FFAB00" }} />
+                    <div title={`${requirementStatusLabel.DONE} ${breakdown.percents.DONE}%`} style={{ width: `${breakdown.percents.DONE}%`, background: "#57D9A3" }} />
+                    <div title={`${requirementStatusLabel.APPROVED} ${breakdown.percents.APPROVED}%`} style={{ width: `${breakdown.percents.APPROVED}%`, background: "#36B37E" }} />
+                    <div title={`${requirementStatusLabel.ARCHIVED} ${breakdown.percents.ARCHIVED}%`} style={{ width: `${breakdown.percents.ARCHIVED}%`, background: "#DFE1E6" }} />
                   </div>
                   <div style={{ display: "flex", gap: 12, marginTop: 8, color: "#6B778C", fontSize: 12 }}>
-                    <span>DRAFT {breakdown.counts.DRAFT}</span>
-                    <span>IN_REVIEW {breakdown.counts.IN_REVIEW}</span>
-                    <span>APPROVED {breakdown.counts.APPROVED}</span>
-                    <span>ARCHIVED {breakdown.counts.ARCHIVED}</span>
+                    <span>{requirementStatusLabel.DRAFT} {breakdown.counts.DRAFT}</span>
+                    <span>{requirementStatusLabel.TO_DO} {breakdown.counts.TO_DO}</span>
+                    <span>{requirementStatusLabel.IN_PROGRESS} {breakdown.counts.IN_PROGRESS}</span>
+                    <span>{requirementStatusLabel.IN_REVIEW} {breakdown.counts.IN_REVIEW}</span>
+                    <span>{requirementStatusLabel.DONE} {breakdown.counts.DONE}</span>
+                    <span>{requirementStatusLabel.APPROVED} {breakdown.counts.APPROVED}</span>
+                    <span>{requirementStatusLabel.ARCHIVED} {breakdown.counts.ARCHIVED}</span>
                   </div>
                 </div>
               </div>
