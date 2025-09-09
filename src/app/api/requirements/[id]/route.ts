@@ -7,7 +7,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const unauthorized = await ensureAuth(req);
   if (unauthorized) return unauthorized;
 
-  const item = await prisma.requirement.findUnique({ where: { id: params.id } });
+  const isReqNum = /^[A-Z]+-\d+$/i.test(params.id);
+  const where = isReqNum ? { requirementNumber: params.id.toUpperCase() } : { id: params.id };
+  const item = await prisma.requirement.findUnique({ where });
   if (!item) return new Response("Not found", { status: 404 });
   const { origin } = new URL(req.url);
   return Response.json({
@@ -44,9 +46,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     });
   }
 
+  const isReqNum = /^[A-Z]+-\d+$/i.test(params.id);
+  const whereUpdate = isReqNum ? { requirementNumber: params.id.toUpperCase() } : { id: params.id };
+
   try {
     const updated = await prisma.requirement.update({
-      where: { id: params.id },
+      where: whereUpdate,
       data: {
         ...parsed.data,
         requirementNumber: parsed.data.requirementNumber?.toUpperCase(),
@@ -82,7 +87,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   const unauthorized = await ensureAuth(req);
   if (unauthorized) return unauthorized;
 
-  const deleted = await prisma.requirement.delete({ where: { id: params.id } }).catch(() => null);
+  const isReqNum = /^[A-Z]+-\d+$/i.test(params.id);
+  const whereDelete = isReqNum ? { requirementNumber: params.id.toUpperCase() } : { id: params.id };
+  const deleted = await prisma.requirement.delete({ where: whereDelete }).catch(() => null);
   if (!deleted) return new Response("Not found", { status: 404 });
   return new Response(null, { status: 204 });
 }
