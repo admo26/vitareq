@@ -24,6 +24,7 @@ export default function RiskEditPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
@@ -94,6 +95,33 @@ export default function RiskEditPage() {
     }
   }
 
+  async function remove() {
+    if (!confirm("Delete this risk? This cannot be undone.")) return;
+    setDeleting(true);
+    setError(null);
+    let headers: Record<string, string> = {};
+    try {
+      if (isAuthenticated) {
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE },
+        });
+        headers = { Authorization: `Bearer ${token}` };
+      } else {
+        await loginWithRedirect();
+        return;
+      }
+    } catch {}
+
+    const res = await axios.delete(`/api/risks/${id}`, { headers }).catch((e) => {
+      setError(e?.response?.data?.error ?? e.message);
+      return null;
+    });
+    setDeleting(false);
+    if (res) {
+      router.push("/risks");
+    }
+  }
+
   return (
     <div style={{ padding: 24 }}>
       <h2 style={{ fontSize: 20, fontWeight: 600 }}>Edit risk</h2>
@@ -127,6 +155,8 @@ export default function RiskEditPage() {
             </select>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
+            <Button appearance="danger" onClick={remove} isDisabled={deleting || saving}>{deleting ? "Deleting…" : "Delete"}</Button>
+            <div style={{ flex: 1 }} />
             <Button appearance="subtle" onClick={() => router.push("/risks")}>Cancel</Button>
             <Button appearance="primary" onClick={save} isDisabled={!name.trim() || saving}>{saving ? "Saving…" : "Save"}</Button>
           </div>

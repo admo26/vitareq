@@ -138,7 +138,11 @@ export default function RequirementsPage() {
               </div>
               <div />
             </div>
-            {r.description && <div style={{ marginTop: 4 }}>{r.description}</div>}
+            {r.description && (
+              <div style={{ marginTop: 4 }}>
+                {r.description.length > 100 ? `${r.description.slice(0, 100)}…` : r.description}
+              </div>
+            )}
           </div>
         ))}
       </div>
