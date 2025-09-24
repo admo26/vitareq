@@ -24,6 +24,7 @@ const RequirementUpdateSchema = z.object({
   description: z.string().nullable().optional(),
   status: z.enum(["DRAFT", "IN_REVIEW", "IN_PROGRESS", "TO_DO", "DONE", "APPROVED", "ARCHIVED"]).optional(),
   riskId: z.string().nullable().optional(),
+  riskLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
   requirementNumber: z
     .string()
     .regex(/^[A-Z]+-\d+$/i, "Invalid requirement number format (e.g. ABC-123)")

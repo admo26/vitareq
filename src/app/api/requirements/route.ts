@@ -48,6 +48,7 @@ const RequirementCreateSchema = z.object({
   owner: z.string().min(1).optional(),
   dueDate: z.coerce.date().optional(),
   jiraKey: z.string().regex(/^[A-Z]+-\d+$/i).optional(),
+  riskLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
         owner: parsed.data.owner,
         dueDate: parsed.data.dueDate,
         jiraKey: parsed.data.jiraKey?.toUpperCase(),
+        riskLevel: parsed.data.riskLevel ?? "MEDIUM",
       },
     });
     const { origin } = new URL(req.url);

@@ -19,6 +19,7 @@ type Requirement = {
   dueDate?: string | null;
   url?: string;
   jiraKey?: string | null;
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH";
 };
 
 export default function RequirementsPage() {
@@ -46,6 +47,12 @@ export default function RequirementsPage() {
     DONE: "success",
     APPROVED: "success",
     ARCHIVED: "removed",
+  };
+
+  const riskAppearance: Record<NonNullable<Requirement["riskLevel"]>, LozengeAppearance> = {
+    LOW: "new",
+    MEDIUM: "moved",
+    HIGH: "removed",
   };
 
   async function load() {
@@ -131,6 +138,11 @@ export default function RequirementsPage() {
                   <Lozenge appearance={requirementStatusAppearance[r.status]}>
                     {requirementStatusLabel[r.status]}
                   </Lozenge>
+                  {r.riskLevel && (
+                    <Lozenge appearance={riskAppearance[r.riskLevel]} isBold>
+                      {r.riskLevel}
+                    </Lozenge>
+                  )}
                   {r.dueDate && <span> · Due: {new Date(r.dueDate).toLocaleDateString()}</span>}
                   {r.owner && <span> · Owner: {r.owner}</span>}
                   {r.jiraKey && <span> · Jira: {r.jiraKey}</span>}

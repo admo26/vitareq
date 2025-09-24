@@ -23,6 +23,7 @@ model Requirement {
   owner       String?
   dueDate     DateTime?
   jiraKey     String?
+  riskLevel   RequirementRisk    @default(MEDIUM)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   riskId      String?
@@ -47,6 +48,12 @@ enum RequirementStatus {
   DONE
   APPROVED
   ARCHIVED
+}
+
+enum RequirementRisk {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 enum RiskStatus {

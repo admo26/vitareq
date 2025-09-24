@@ -75,6 +75,7 @@ async function main() {
     status: (typeof reqStatuses)[number];
     owner: string;
     dueDate: Date;
+    riskLevel?: "LOW" | "MEDIUM" | "HIGH";
   }[] = [
     {
       requirementNumber: "VREQ-001",
@@ -84,6 +85,7 @@ async function main() {
       status: "IN_PROGRESS",
       owner: owners[0],
       dueDate: daysFromNow(14),
+      riskLevel: "HIGH",
     },
     {
       requirementNumber: "VREQ-002",
@@ -93,6 +95,7 @@ async function main() {
       status: "IN_REVIEW",
       owner: owners[1],
       dueDate: daysFromNow(3),
+      riskLevel: "MEDIUM",
     },
     {
       requirementNumber: "VREQ-003",
@@ -102,6 +105,7 @@ async function main() {
       status: "TO_DO",
       owner: owners[2],
       dueDate: daysFromNow(45),
+      riskLevel: "LOW",
     },
     {
       requirementNumber: "VREQ-004",
@@ -111,6 +115,7 @@ async function main() {
       status: "DRAFT",
       owner: owners[3],
       dueDate: daysFromNow(21),
+      riskLevel: "MEDIUM",
     },
     {
       requirementNumber: "VREQ-005",
@@ -120,6 +125,7 @@ async function main() {
       status: "IN_PROGRESS",
       owner: owners[4],
       dueDate: daysFromNow(-7),
+      riskLevel: "HIGH",
     },
     {
       requirementNumber: "VREQ-006",
@@ -128,6 +134,7 @@ async function main() {
       status: "DONE",
       owner: owners[5],
       dueDate: daysFromNow(-30),
+      riskLevel: "LOW",
     },
     {
       requirementNumber: "VREQ-007",
@@ -136,6 +143,7 @@ async function main() {
       status: "APPROVED",
       owner: owners[6],
       dueDate: daysFromNow(-14),
+      riskLevel: "MEDIUM",
     },
     {
       requirementNumber: "VREQ-008",
@@ -145,6 +153,7 @@ async function main() {
       status: "IN_REVIEW",
       owner: owners[7],
       dueDate: daysFromNow(7),
+      riskLevel: "LOW",
     },
     {
       requirementNumber: "VREQ-009",
@@ -154,6 +163,7 @@ async function main() {
       status: "IN_PROGRESS",
       owner: owners[8],
       dueDate: daysFromNow(28),
+      riskLevel: "HIGH",
     },
     {
       requirementNumber: "VREQ-010",
@@ -163,6 +173,7 @@ async function main() {
       status: "TO_DO",
       owner: owners[9],
       dueDate: daysFromNow(60),
+      riskLevel: "LOW",
     },
     {
       requirementNumber: "VREQ-011",
@@ -172,6 +183,7 @@ async function main() {
       status: "APPROVED",
       owner: owners[10],
       dueDate: daysFromNow(-60),
+      riskLevel: "MEDIUM",
     },
     {
       requirementNumber: "VREQ-012",
@@ -181,6 +193,7 @@ async function main() {
       status: "DONE",
       owner: owners[11],
       dueDate: daysFromNow(-10),
+      riskLevel: "LOW",
     },
     {
       requirementNumber: "VREQ-013",
@@ -190,6 +203,7 @@ async function main() {
       status: "IN_PROGRESS",
       owner: owners[0],
       dueDate: daysFromNow(10),
+      riskLevel: "MEDIUM",
     },
     {
       requirementNumber: "VREQ-014",
@@ -199,6 +213,7 @@ async function main() {
       status: "IN_REVIEW",
       owner: owners[1],
       dueDate: daysFromNow(5),
+      riskLevel: "LOW",
     },
     {
       requirementNumber: "VREQ-015",
@@ -208,6 +223,7 @@ async function main() {
       status: "DRAFT",
       owner: owners[2],
       dueDate: daysFromNow(20),
+      riskLevel: "HIGH",
     },
     {
       requirementNumber: "VREQ-016",
@@ -217,6 +233,7 @@ async function main() {
       status: "TO_DO",
       owner: owners[3],
       dueDate: daysFromNow(30),
+      riskLevel: "MEDIUM",
     },
     {
       requirementNumber: "VREQ-017",
@@ -226,6 +243,7 @@ async function main() {
       status: "IN_PROGRESS",
       owner: owners[4],
       dueDate: daysFromNow(15),
+      riskLevel: "HIGH",
     },
     {
       requirementNumber: "VREQ-018",
@@ -235,6 +253,7 @@ async function main() {
       status: "DONE",
       owner: owners[5],
       dueDate: daysFromNow(-3),
+      riskLevel: "LOW",
     },
     {
       requirementNumber: "VREQ-019",
@@ -244,6 +263,7 @@ async function main() {
       status: "IN_REVIEW",
       owner: owners[6],
       dueDate: daysFromNow(12),
+      riskLevel: "MEDIUM",
     },
     {
       requirementNumber: "VREQ-020",
@@ -253,6 +273,7 @@ async function main() {
       status: "ARCHIVED",
       owner: owners[7],
       dueDate: daysFromNow(-90),
+      riskLevel: "LOW",
     },
   ];
 
@@ -263,7 +284,7 @@ async function main() {
     });
   }
 
-  console.log("Seed completed with 30 risks and 20 requirements.");
+  console.log("Seed completed with 30 risks and 20 requirements (with risk levels).");
 }
 
 main()

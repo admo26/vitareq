@@ -17,6 +17,7 @@ type Requirement = {
   title: string;
   description?: string | null;
   status: "DRAFT" | "IN_REVIEW" | "IN_PROGRESS" | "TO_DO" | "DONE" | "APPROVED" | "ARCHIVED";
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH";
   requirementNumber?: string | null;
   owner?: string | null;
   dueDate?: string | null;
@@ -39,6 +40,7 @@ export default function RequirementEditPage() {
   const [requirementNumber, setRequirementNumber] = useState("");
   const [owner, setOwner] = useState("");
   const [status, setStatus] = useState<Requirement["status"]>("DRAFT");
+  const [riskLevel, setRiskLevel] = useState<Requirement["riskLevel"]>("MEDIUM");
   const [dueDate, setDueDate] = useState("");
   const [jiraKey, setJiraKey] = useState("");
   const [createdAt, setCreatedAt] = useState("");
@@ -72,6 +74,7 @@ export default function RequirementEditPage() {
       setRequirementNumber(r.requirementNumber ?? "");
       setOwner(r.owner ?? "");
       setStatus(r.status);
+      setRiskLevel((r.riskLevel as any) || "MEDIUM");
       setDueDate(r.dueDate ? r.dueDate.substring(0, 10) : "");
       setJiraKey(r.jiraKey ?? "");
       setCreatedAt(r.createdAt ?? "");
@@ -105,6 +108,7 @@ export default function RequirementEditPage() {
       title,
       description: description || null,
       status,
+      riskLevel,
       requirementNumber: requirementNumber || undefined,
       owner: owner || undefined,
       dueDate: dueDate || undefined,
@@ -316,6 +320,14 @@ export default function RequirementEditPage() {
                         <option value="DONE">Done</option>
                         <option value="APPROVED">Approved</option>
                         <option value="ARCHIVED">Archived</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="req-risk" style={{ display: "block", marginBottom: 4, fontSize: 12, color: "#6B778C" }}>Risk</label>
+                      <select id="req-risk" name="req-risk" value={riskLevel} onChange={(e) => setRiskLevel(e.target.value as Requirement["riskLevel"])} style={{ height: 36, border: "1px solid #EBECF0", borderRadius: 3, padding: "6px 8px", width: "100%" }}>
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
                       </select>
                     </div>
                     <div>
